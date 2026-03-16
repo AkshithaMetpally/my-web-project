@@ -224,6 +224,15 @@ class GhostScraper:
                     
                     # Perform our human-mimicry scrolling to load dynamic reviews
                     await self._human_mimicry_scroll(page)
+                    # Force a longer human-like pause (Amazon is slow on cloud servers)
+        await asyncio.sleep(random.uniform(7.0, 10.0)) 
+        
+        # Explicitly wait for Amazon reviews to appear in the HTML
+        try:
+            await page.wait_for_selector('div[data-hook="review"]', timeout=20000)
+            print("SUCCESS: Reviews are visible on the page.")
+        except Exception:
+            print("WARNING: Reviews did not load. Possible CAPTCHA block.")
                     
                     # Dynamic Waiting: Wait for potential review containers to load
                     try:
