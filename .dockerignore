@@ -3,8 +3,9 @@
 __pycache__/
 .venv/
 venv/
-# Ignore all the extra debug/test files to save space
-debug_*
-test_*
-*.html
-!templates/*.html
+
+# Only ignore the specific debug files you don't need
+debug_amazon.html
+debug_apple_macbook.html
+debug_macbook.txt
+# Add any other specific large files here
