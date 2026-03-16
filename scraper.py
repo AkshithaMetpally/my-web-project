@@ -198,15 +198,14 @@ class GhostScraper:
             async with async_playwright() as p:
                 browser = await p.chromium.launch(headless=self.headless)
                 context = await browser.new_context(
-                    locale="en-US",
-                    timezone_id="America/New_York",
+                    user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                     viewport={'width': 1920, 'height': 1080}
                 )
                 page = await context.new_page()
                 
-                # Apply evasions to bypass basic bot protection
-                await Stealth().apply_stealth_async(page)
-            
+                # Direct stealth application
+                from playwright_stealth import stealth_async
+                await stealth_async(page)
                 try:
                     # Add random initial delay to mimic user thinking time
                     await asyncio.sleep(random.uniform(1.0, 3.0))
@@ -275,144 +274,11 @@ class GhostScraper:
             
         # Demonstration Fallback: Amazon frequently blocks scrapers with CAPTCHAs. 
         # If no reviews were found on an Amazon URL, return realistic mock data for the demo.
-        if not reviews and 'amazon.' in url:
-            print("Amazon extraction failed (likely bot protection). Using fallback demo data.")
-            reviews = [
-                {
-                    "id": "fall_1",
-                    "text": "The display on this iPhone 17 is absolutely gorgeous. I upgraded from a 13 Pro and the ProMotion 120Hz combined with the new scratch resistance makes it feel incredibly premium. Battery lasts me easily a day and a half. Definitely recommend!",
-                    "rating_raw": "5",
-                    "timestamp": "March 10, 2026",
-                    "features": {}
-                },
-                {
-                    "id": "fall_2",
-                    "text": "Honestly, I'm a bit underwhelmed. The camera is good but not a massive leap from last year. Worse, my unit gets noticeably warm when playing intensive games after just 20 minutes. At this price point, I expected flawless thermal management.",
-                    "rating_raw": "3",
-                    "timestamp": "March 5, 2026",
-                    "features": {}
-                },
-                {
-                    "id": "fall_amz_3",
-                    "text": "This phone changed my life. Everything works perfectly. Best phone ever 10/10. Must buy. Fast shipping.",
-                    "rating_raw": "5",
-                    "timestamp": "March 8, 2026",
-                    "features": {}
-                }
-            ]
-            
-        if not reviews and 'meesho.' in url:
-            print("Meesho extraction failed (Akamai bot protection). Using fallback demo data.")
-            reviews = [
-                {
-                    "id": "fall_mes_1",
-                    "text": "Quality is very poor. The strap broke after just two days of wearing it around the house. Looks nice in pictures but material feels incredibly cheap.",
-                    "rating_raw": "1",
-                    "timestamp": "February 20, 2026",
-                    "features": {"Fit": "True to size"}
-                },
-                {
-                    "id": "fall_mes_2",
-                    "text": "Nice slippers for daily use. Comfortable and looks exact same as shown in the picture. Worth the price.",
-                    "rating_raw": "4",
-                    "timestamp": "March 1, 2026",
-                    "features": {"Comfort": "High"}
-                },
-                {
-                    "id": "fall_mes_3",
-                    "text": "Super quality best product very very nice so beautiful elegant looking like a wow.",
-                    "rating_raw": "5",
-                    "timestamp": "January 15, 2026",
-                    "features": {}
-                }
-            ]
-            
-        if not reviews and 'nykaa.' in url:
-            print("Nykaa extraction failed (bot protection). Using fallback demo data.")
-            reviews = [
-                {
-                    "id": "fall_nyk_1",
-                    "text": "The shade is absolutely stunning and it truly lasts all day without drying out my lips! The matte finish is perfect, doesn't transfer even after eating. Highly recommend this lipstick to everyone.",
-                    "rating_raw": "5",
-                    "timestamp": "March 2, 2026",
-                    "features": {"Longevity": "Excellent"}
-                },
-                {
-                    "id": "fall_nyk_2",
-                    "text": "Colour is completely different from what is shown in the picture. Extremely disappointed. Also it made my lips very dry and flaky. Will not repurchase or recommend.",
-                    "rating_raw": "2",
-                    "timestamp": "February 10, 2026",
-                    "features": {}
-                },
-                {
-                    "id": "fall_nyk_3",
-                    "text": "Love the formula, it glides on smoothly. Scent is a bit strong initially but fades away. Good value for money.",
-                    "rating_raw": "4",
-                    "timestamp": "March 11, 2026",
-                    "features": {"Texture": "Smooth"}
-                }
-            ]
-
-        if not reviews and 'yelp.' in url:
-            print("Yelp extraction failed (bot protection). Using fallback demo data.")
-            reviews = [
-                {
-                    "id": "fall_yelp_1",
-                    "text": "The barista was incredibly rude and my coffee was burnt. I've been coming to this location for years but this new management is terrible. The tables were also sticky and unwashed.",
-                    "rating_raw": "1",
-                    "timestamp": "March 11, 2026",
-                    "features": {"Service": "Poor", "Cleanliness": "Bad"}
-                },
-                {
-                    "id": "fall_yelp_2",
-                    "text": "Standard Starbucks experience. Drink was made correctly and came out fast. It's a bit loud inside so not great for working, but fine for a quick stop.",
-                    "rating_raw": "3",
-                    "timestamp": "February 25, 2026",
-                    "features": {"Atmosphere": "Loud"}
-                },
-                {
-                    "id": "fall_yelp_3",
-                    "text": "Love this location! They always remember my name and my order is always perfect. The new seasonal drinks are amazing.",
-                    "rating_raw": "5",
-                    "timestamp": "March 5, 2026",
-                    "features": {"Service": "Excellent"}
-                }
-            ]
-            
-        if not reviews and 'flipkart.' in url:
-            print("Flipkart extraction failed (bot protection/lazy load). Using fallback demo data.")
-            reviews = [
-                {
-                    "id": "fall_flip_1",
-                    "text": "The earbuds disconnect constantly and the right one stopped charging after a week. Waste of money.",
-                    "rating_raw": "1",
-                    "timestamp": "March 10, 2026",
-                    "features": {"Connectivity": "Poor", "Battery": "Defective"}
-                },
-                {
-                    "id": "fall_flip_2",
-                    "text": "Best gaming earbuds in this price range! Low latency mode actually works and the mic is very clear for calls.",
-                    "rating_raw": "5",
-                    "timestamp": "March 8, 2026",
-                    "features": {"Value": "High", "Mic": "Clear"}
-                },
-                {
-                    "id": "fall_flip_3",
-                    "text": "Sound quality is average but acceptable for the price. Build quality feels a bit flimsy. Good for casual use.",
-                    "rating_raw": "3",
-                    "timestamp": "February 28, 2026",
-                    "features": {"Sound": "Average"}
-                },
-                 {
-                    "id": "fall_flip_4",
-                    "text": "Amazing sound, super bass, nice clear voice. Very nice product amazing quality lovely lovely lovely.",
-                    "rating_raw": "5",
-                    "timestamp": "March 1, 2026",
-                    "features": {}
-                }
-            ]
-
-        return reviews
+        
+           
+              
+               
+          
 
 # Optional: Run directly for testing
 if __name__ == "__main__":
