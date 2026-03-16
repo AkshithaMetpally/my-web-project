@@ -4,9 +4,11 @@ from flask import Flask, request, jsonify, render_template
 # Try to import scraper safely
 try:
     from scraper import GhostScraper
-except ImportError:
+    print("GhostScraper loaded successfully!")
+except Exception as e:
+    print(f"SCRAPER IMPORT ERROR: {e}")
     GhostScraper = None
-
+    
 from ml_models.feature_extract import extract_behavioral_features
 from ml_models.hybrid_model import HybridModelSystem
 from ml_models.explainability import XAIExplainer
