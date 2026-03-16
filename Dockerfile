@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Install system dependencies for Playwright
+# Install system dependencies for Playwright (Corrected package names)
 RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     libnss3 \
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     libxdamage1 \
     libxext6 \
     libxfixes3 \
-    librandr2 \
+    libxrandr2 \
     libgbm1 \
     libpango-1.0-0 \
     libcairo2 \
