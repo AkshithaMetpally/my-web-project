@@ -190,9 +190,6 @@ class GhostScraper:
         return unique_reviews
 
     async def scrape_url(self, url: str) -> List[Dict[str, Any]]:
-        """
-        Main method to navigate, mimic human behavior, and parse dom.
-        """
         reviews: List[Dict[str, Any]] = []
         try:
             async with async_playwright() as p:
@@ -203,88 +200,40 @@ class GhostScraper:
                 )
                 page = await context.new_page()
                 
-                # Direct stealth application
                 from playwright_stealth import stealth_async
                 await stealth_async(page)
+                
                 try:
-                    # Add random initial delay to mimic user thinking time
                     await asyncio.sleep(random.uniform(1.0, 3.0))
-                    
                     await page.goto(url, wait_until="domcontentloaded", timeout=60000)
                     
-                    # If Amazon, try to go to the "See all reviews" page directly to escape lazy loading
                     if 'amazon.' in url:
                         try:
-                            # Try to click 'See all reviews'
                             see_all_link = await page.locator("a[data-hook='see-all-reviews-link-foot']").get_attribute('href', timeout=5000)
                             if see_all_link:
                                 await page.goto(f"https://www.amazon.in{see_all_link}", wait_until="domcontentloaded", timeout=60000)
-                        except Exception as e:
-                            print(f"Could not navigate to all reviews page via link: {e}")
+                        except:
+                            pass
                     
-                    # Perform our human-mimicry scrolling to load dynamic reviews
                     await self._human_mimicry_scroll(page)
-                    # Force a longer human-like pause (Amazon is slow on cloud servers)
-        await asyncio.sleep(random.uniform(7.0, 10.0)) 
+                    await asyncio.sleep(random.uniform(7.0, 10.0)) 
         
-        # Explicitly wait for Amazon reviews to appear in the HTML
-        try:
-            await page.wait_for_selector('div[data-hook="review"]', timeout=20000)
-            print("SUCCESS: Reviews are visible on the page.")
-        except Exception:
-            print("WARNING: Reviews did not load. Possible CAPTCHA block.")
-                    
-                    # Dynamic Waiting: Wait for potential review containers to load
                     try:
-                        await page.wait_for_selector("div[data-hook='review'], .review-text, .user-review, .z9e2, .wiI7pd", timeout=10000)
-                    except Exception:
-                        print("Dynamic wait timed out. Continuing with extraction.")
-                    
-                    # Expand 'Read More' buttons for full linguistic analysis
-                    try:
-                        # Common selectors for read more/view more buttons
-                        read_more_selectors = [
-                            "button:has-text('Read more')",
-                            "button:has-text('Read More')",
-                            "button:has-text('View more')",
-                            "button:has-text('View More')",
-                            "button:has-text('Show more')",
-                            "a:has-text('Read more')",
-                            "span:has-text('Read more')",
-                            "div[role='button']:has-text('More')",
-                            ".w8nwRe", # Google Maps more button
-                        ]
-                        for selector in read_more_selectors:
-                            buttons = await page.locator(selector).all()
-                            for btn in buttons:
-                                if await btn.is_visible():
-                                    await btn.click()
-                                    await asyncio.sleep(random.uniform(0.1, 0.5))
-                    except Exception as e:
-                        print(f"Failed to expand some reviews: {e}")
-                    
-                    # Final pause before grabbing the DOM
-                    await asyncio.sleep(random.uniform(1.0, 2.0))
+                          await page.wait_for_selector('div[data-hook="review"]', timeout=20000)
+                    except:
+                          print("Timeout waiting for reviews.")
                     
                     html_content = await page.content()
-                    with open("debug_apple_macbook.html", "w", encoding="utf-8") as f:
-                        f.write(html_content)
                     reviews = self.extract_reviews(html_content)
                     
                 except Exception as e:
                     print(f"Error scraping {url}: {e}")
-                    
                 finally:
-                    if 'browser' in locals():
-                        await browser.close()
-                    
+                    await browser.close()
         except Exception as e:
-            print(f"Playwright initialization error: {e}")
+            print(f"Playwright error: {e}")
             
-        # Demonstration Fallback: Amazon frequently blocks scrapers with CAPTCHAs. 
-        # If no reviews were found on an Amazon URL, return realistic mock data for the demo.
-        
-           
+        return reviews
               
                
           
