@@ -1,10 +1,10 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
 .git
 .github
-.venv
+__pycache__/
+.venv/
 venv/
-env/
-.env
+# Ignore all the extra debug/test files to save space
+debug_*
+test_*
+*.html
+!templates/*.html
